@@ -1,0 +1,179 @@
+/* 🌑 Base Layout */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Poppins", sans-serif;
+  background-color: #121212;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #121212;
+}
+
+/* 🎬 Clapperboard Auth Screen */
+.clapperboard-container {
+  background-color: #1e1e1e;
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  width: 360px;
+  max-width: 90%;
+  animation: fadeIn 0.8s ease;
+}
+
+.clapperboard-top {
+  display: flex;
+  background-color: #2c2c2c;
+  padding: 8px;
+}
+
+.stripe {
+  flex: 1;
+  height: 20px;
+  background: repeating-linear-gradient(
+    45deg,
+    #fff 0 10px,
+    #000 10px 20px
+  );
+  margin: 0 2px;
+  border-radius: 4px;
+}
+
+.clapperboard-main {
+  background-color: #1e1e1e;
+  padding: 25px;
+  text-align: center;
+}
+
+/* 🏷️ Title */
+.clapperboard-title {
+  color: #FFC759;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+/* ✍️ Auth Forms */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: #FFC759;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+input {
+  background-color: #2b2b2b;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 10px;
+  color: white;
+  outline: none;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #FFC759;
+  box-shadow: 0 0 5px #FFC75950;
+}
+
+/* 🎛️ Buttons */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.login-button,
+.signup-button-alt {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-button {
+  background-color: #2b2b2b;
+  color: #FFC759;
+  border: 1px solid #FFC759;
+}
+
+.login-button:hover {
+  background-color: #FFC759;
+  color: #121212;
+}
+
+.signup-button-alt {
+  background-color: #FFC759;
+  color: #121212;
+}
+
+.signup-button-alt:hover {
+  background-color: #c8a452;
+}
+
+/* ⏳ Loading Screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #000;
+}
+
+.loader-gif {
+  width: 120px;
+  height: 120px;
+}
+
+/* 🟡 Floating Header */
+.header {
+  transition: all 0.3s ease;
+}
+
+.header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* 🪄 Dashboard Main Text */
+main h1 {
+  font-size: 2rem;
+  color: #FFC759;
+  margin-bottom: 10px;
+}
+
+main p {
+  font-size: 1rem;
+  color: #ccc;
+}
+
+/* ✨ Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
