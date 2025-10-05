@@ -1,0 +1,185 @@
+.home-container {
+  padding: 40px;
+  min-height: 100vh;
+  background-color: #121212;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  width: 90%;
+  max-width: 1200px;
+}
+
+.card {
+  background: #1e1e1e;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+  transition: all 0.4s ease;
+  height: 300px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.6);
+}
+
+.card.expanded {
+  height: 450px;
+  background-color: #2b2b2b;
+}
+
+.card h2 {
+  color: #ffc759;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+/* Summary */
+.summary-details p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+.summary-details strong {
+  color: #ffc759;
+}
+
+.progress-section {
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  background-color: #2b2b2b;
+  border-radius: 8px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #ffc759;
+  border-radius: 8px;
+  transition: width 1s ease;
+  box-shadow: 0 0 10px rgba(255, 199, 89, 0.5);
+}
+
+/* Chart */
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* In Progress */
+.progress-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.progress-card li {
+  background-color: #2b2b2b;
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #fff;
+  transition: 0.3s;
+}
+
+.progress-card li:hover {
+  background-color: #ffc759;
+  color: #121212;
+}
+
+/* Calendar */
+.modern-calendar {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 199, 89, 0.3);
+  border-radius: 14px;
+  padding: 8px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-calendar {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #ffc759; /* <-- Yellow palette for all date text */
+  font-family: "Poppins", sans-serif;
+}
+
+.custom-calendar .react-calendar__navigation button {
+  color: #ffc759;
+  font-weight: 600;
+  border-radius: 8px;
+  margin: 2px;
+  transition: 0.3s;
+}
+
+.custom-calendar .react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  color: #f5e6b3;
+}
+
+.custom-calendar .react-calendar__navigation button:hover {
+  background: rgba(255, 199, 89, 0.2);
+}
+
+.custom-calendar .react-calendar__tile {
+  border-radius: 8px;
+  padding: 10px;
+  background: transparent;
+  color: #ffc759; /* Brighter yellow date numbers */
+  transition: 0.3s;
+}
+
+.custom-calendar .react-calendar__tile--now {
+  background: rgba(255, 199, 89, 0.25);
+  border: 1px solid #ffc759;
+  color: #fff;
+}
+
+.custom-calendar .react-calendar__tile--active {
+  background: #ffc759;
+  color: #121212 !important;
+  font-weight: bold;
+}
+
+.custom-calendar .react-calendar__tile:hover {
+  background: #f5e6b3;
+  color: #121212 !important;
+}
+
+/* Expanded Info */
+.extra-content {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    height: auto;
+  }
+}

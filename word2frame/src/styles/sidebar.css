@@ -1,62 +1,57 @@
+/* Sidebar styles */
 .sidebar {
   position: fixed;
-  top: 0;
   left: 0;
+  top: 0;
   width: 220px;
   height: 100vh;
-  background-color: #1a1a1a; /* Deep charcoal */
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  padding: 30px 15px;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(26,26,26,1) 100%);
+  padding: 24px 16px;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.6);
+  z-index: 2000;
 }
 
-/* Menu heading */
 .menu-heading {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #ffc759; /* Golden accent */
-  text-transform: uppercase;
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 8px 0 18px 8px;
   letter-spacing: 1px;
-  margin-bottom: 20px;
-  margin-left: 10px;
 }
 
-/* Navigation links */
 .nav-links {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+.nav-links a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .nav-links li {
   display: flex;
   align-items: center;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  gap: 10px;
+  color: #ddd;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.18s ease, transform 0.12s ease;
 }
 
 .nav-links li:hover {
-  background-color: #282828;
-  transform: translateX(6px);
+  background: rgba(255,199,89,0.08);
+  transform: translateX(4px);
+  color: #fff;
 }
 
-.icon {
-  margin-right: 12px;
-  font-size: 1.1rem;
-  color: #ffc759;
+.nav-links .icon {
+  color: var(--accent);
 }
 
-.nav-links li:hover .icon {
-  color: #c8a452; /* Muted gold on hover */
-}
-
-.nav-links li:hover {
-  color: #ffc759;
+/* push main content to the right using a helper class (App places margin-left) */
+.sidebar + .content-spacer {
+  margin-left: 240px;
 }
