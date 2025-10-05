@@ -142,6 +142,17 @@ vite.config.ts.timestamp-*
 __pycache__/
 *.pyc
 
+# Backup/temp files
+*.bak
+
+# AI artifacts (models, datasets, sample files)
+ai/models/
+ai/*.pkl
+ai/dataset.csv
+ai/sample.pdf
+ai/*.pdf
+ai/__pycache__/
+
 # AI artifacts (models, datasets, sample files)
 ai/*.pkl
 ai/dataset.csv

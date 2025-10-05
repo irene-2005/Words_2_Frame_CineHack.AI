@@ -1,0 +1,12 @@
+{
+  "start_date": "2025-10-05",
+  "schedule": [
+    {
+      "task": "t1",
+      "dates": [
+        "2025-10-06"
+      ],
+      "assigned_to": "C1"
+    }
+  ]
+}

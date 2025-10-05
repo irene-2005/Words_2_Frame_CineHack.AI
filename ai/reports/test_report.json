@@ -1,0 +1,46 @@
+{
+  "breakdown": {
+    "input": "sample.txt",
+    "num_scenes": 2,
+    "scenes": [
+      {
+        "heading": "INT. HOUSE - DAY",
+        "content": [
+          "JOHN",
+          "Hello."
+        ]
+      },
+      {
+        "heading": "EXT. PARK - NIGHT",
+        "content": [
+          "CHASE and EXPLOSION."
+        ]
+      }
+    ],
+    "characters": [
+      "JOHN"
+    ]
+  },
+  "budget": {
+    "predicted_budget": 33660,
+    "costs": {
+      "pre_production": 3366,
+      "production": 20196,
+      "post_production": 8415,
+      "contingency": 1683
+    }
+  },
+  "tasks": [
+    {
+      "scene_index": 0,
+      "role": "VFX Lead",
+      "assigned_to": "C1"
+    },
+    {
+      "scene_index": 1,
+      "role": "Audio Lead",
+      "assigned_to": "C2"
+    }
+  ],
+  "schedule_file": "C:\\Users\\athir\\Words2Frame\\Words_2_Frame_CineHack.AI\\ai\\schedules\\schedule_2025-10-05.json"
+}

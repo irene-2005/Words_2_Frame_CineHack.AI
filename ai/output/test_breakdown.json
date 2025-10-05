@@ -1,0 +1,22 @@
+{
+  "input": "sample.txt",
+  "num_scenes": 2,
+  "scenes": [
+    {
+      "heading": "INT. HOUSE - DAY",
+      "content": [
+        "JOHN",
+        "Hello."
+      ]
+    },
+    {
+      "heading": "EXT. PARK - NIGHT",
+      "content": [
+        "CHASE and EXPLOSION."
+      ]
+    }
+  ],
+  "characters": [
+    "JOHN"
+  ]
+}
