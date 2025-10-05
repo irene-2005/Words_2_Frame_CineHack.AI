@@ -6,7 +6,7 @@
 
 .home-title {
   font-size: 2.5rem;
-  color: #ffc759;
+  color: var(--accent);
   font-weight: 700;
   margin-bottom: 10px;
   letter-spacing: 1px;
@@ -33,7 +33,7 @@
 }
 
 .card h3 {
-  color: #ffc759;
+  color: var(--accent);
   font-size: 1.5rem;
   margin-top: 0;
 }
@@ -78,7 +78,7 @@
 
 .empty-state-message {
   padding: 50px;
-  border: 2px dashed #ffc759;
+  border: 2px dashed var(--accent);
   border-radius: 12px;
   background-color: #1a1a1a;
   color: #e0e0e0;

@@ -1,40 +1,50 @@
-import React, { useContext } from "react";
-import { ScriptContext } from "../context/ScriptContext";
-import { FaMoneyBillAlt } from "react-icons/fa";
-import "../styles/other-pages.css";
+import React, { useContext } from 'react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import '../styles/other-pages.css';
+import { ScriptContext } from '../context/ScriptContext';
 
 const BudgetPrediction = () => {
   const { scriptData } = useContext(ScriptContext);
+  const perScene = scriptData?.budget?.perScene || [];
+  const total = scriptData?.budget?.total || 0;
+
+  // 🤖 TODO: Send script to Flask AI for more accurate budget prediction
+  // const resp = await fetch('/api/predict_budget', { method: 'POST', body: JSON.stringify({ scriptText }) });
+
+  const chartData = perScene.map((d) => ({ name: d.scene, value: d.total }));
 
   return (
     <div className="page-container">
       <h1 className="page-title">Budget Prediction</h1>
-      <p className="page-subtitle">An estimate of your production budget.</p>
+      <p className="page-subtitle">Estimated costs based on scene breakdown</p>
 
-      {!scriptData.uploadedScript ? (
-        <div className="empty-state-message">
-          <h3 className="section-heading">No Script Loaded</h3>
-          <p>Please upload a script in the Script Manager to view the budget prediction.</p>
-        </div>
-      ) : (
-        <div className="budget-section">
-          <div className="total-budget-card">
-            <FaMoneyBillAlt className="card-icon" />
-            <h3 className="section-heading">Total Estimated Budget</h3>
-            <p className="total-amount">₹{scriptData.budget?.total?.toLocaleString('en-IN')}</p>
+      <div className="grid-2">
+        <div className="card">
+          <h3>Estimated Total</h3>
+          <p style={{ fontSize: 22, color: 'var(--accent)' }}>₹ {total.toLocaleString('en-IN')}</p>
+          <div style={{ height: 240 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" stroke="#ccc" />
+                <YAxis stroke="#ccc" />
+                <Tooltip />
+                <Bar dataKey="value" fill="var(--accent)" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <div className="budget-breakdown">
-            <h3 className="section-heading">Budget per Scene</h3>
+        </div>
+
+        <div className="card">
+          <h3>Breakdown</h3>
+          {perScene.length === 0 ? <p>No budget data available. Run analysis in Script Manager.</p> : (
             <ul>
-              {scriptData.budget?.perScene.map((item, index) => (
-                <li key={index}>
-                  <strong>{item.scene}:</strong> ₹{item.total.toLocaleString('en-IN')}
-                </li>
+              {perScene.map((p, i) => (
+                <li key={i}><strong>{p.scene}:</strong> ₹ {p.total.toLocaleString('en-IN')}</li>
               ))}
             </ul>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -11,10 +11,12 @@ const CrewManagement = () => {
   const [newCrewRole, setNewCrewRole] = useState("");
 
   useEffect(() => {
-    if (scriptData.crew) {
+    if (scriptData?.crew) {
       setCrewList(scriptData.crew);
+    } else {
+      setCrewList([]);
     }
-  }, [scriptData.crew]);
+  }, [scriptData]);
 
   const handleAddCrew = () => {
     if (newCrewName && newCrewRole) {
@@ -31,7 +33,12 @@ const CrewManagement = () => {
       setNewCrewRole("");
       setShowModal(false);
     } else {
-      alert("Please enter both name and role.");
+      if (typeof window !== 'undefined' && window.showSiteToast) {
+        window.showSiteToast('Please enter both name and role.');
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('Please enter both name and role.');
+      }
     }
   };
 
@@ -40,7 +47,7 @@ const CrewManagement = () => {
       <h1 className="page-title">Crew Management</h1>
       <p className="page-subtitle">Manage your cast and crew assignments.</p>
 
-      {!scriptData.uploadedScript ? (
+  {!scriptData?.uploadedScript ? (
         <div className="empty-state-message">
           <h3 className="section-heading">No Script Loaded</h3>
           <p>Please upload a script in the Script Manager to manage your crew.</p>

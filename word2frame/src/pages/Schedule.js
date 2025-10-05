@@ -1,33 +1,37 @@
-import React, { useContext } from "react";
-import { ScriptContext } from "../context/ScriptContext";
-import { FaCalendarAlt, FaMapMarkerAlt, FaUser } from "react-icons/fa";
-import "../styles/other-pages.css";
+import React, { useContext } from 'react';
+import '../styles/other-pages.css';
+import { ScriptContext } from '../context/ScriptContext';
+import { FaCalendarAlt, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 
 const Schedule = () => {
   const { scriptData } = useContext(ScriptContext);
+  const source = scriptData?.scheduleData || [];
+
+  // 🔗 TODO: Integrate schedule CRUD with backend (Firebase / Flask)
+  // Example: await fetch('/api/schedule', { method: 'POST', body: JSON.stringify(newEntry) })
 
   return (
     <div className="page-container">
       <h1 className="page-title">Schedule</h1>
-      <p className="page-subtitle">Your automatically generated shooting schedule.</p>
+      <p className="page-subtitle">Shooting schedule and call sheets</p>
 
-      {!scriptData.uploadedScript ? (
+      {!source || source.length === 0 ? (
         <div className="empty-state-message">
-          <h3 className="section-heading">No Script Loaded</h3>
-          <p>Please upload a script in the Script Manager to view the schedule.</p>
+          <h3 className="section-heading">No scheduled days</h3>
+          <p>Use Script Manager to create a shooting schedule for your project.</p>
         </div>
       ) : (
         <div className="schedule-list">
-          {scriptData.scheduleData.map((item) => (
-            <div key={item.id} className="schedule-item">
+          {source.map((s) => (
+            <div key={s.id} className="schedule-item card">
               <div className="schedule-date">
                 <FaCalendarAlt className="date-icon" />
-                <span>{item.date}</span>
+                <strong style={{ marginLeft: 8 }}>{s.date}</strong>
               </div>
               <div className="schedule-details">
-                <h3>{item.scene}</h3>
-                <p><FaMapMarkerAlt /> <strong>Location:</strong> {item.location}</p>
-                <p><FaUser /> <strong>Cast:</strong> {item.cast.join(', ')}</p>
+                <h3>{s.scene}</h3>
+                <p><FaMapMarkerAlt /> <strong>Location:</strong> {s.location}</p>
+                <p><FaUser /> <strong>Cast:</strong> {s.cast.join(', ')}</p>
               </div>
             </div>
           ))}

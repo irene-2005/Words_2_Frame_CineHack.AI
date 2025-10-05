@@ -3,8 +3,8 @@ import { FaCog, FaUser, FaEnvelope, FaLock, FaCheckCircle } from "react-icons/fa
 import "../styles/other-pages.css";
 
 const Settings = () => {
-  const [name, setName] = useState("Filmmaker Nick");
-  const [email, setEmail] = useState("filmmaker.nick@example.com");
+  const [name, setName] = useState(" ");
+  const [email, setEmail] = useState(" ");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");

@@ -1,24 +1,32 @@
-import React, { useContext } from "react";
-import { ScriptContext } from "../context/ScriptContext";
-import { FaPlus, FaCircle } from "react-icons/fa";
-import "../styles/other-pages.css";
+import React, { useContext } from 'react';
+import { ScriptContext } from '../context/ScriptContext';
+import { FaPlus, FaCircle } from 'react-icons/fa';
+import '../styles/Production.css';
 
 const ProductionBoard = () => {
   const { scriptData } = useContext(ScriptContext);
 
+  // Use real data if present
+  const board = scriptData?.productionBoard || null;
+
+  // 🔗 TODO: Sync tasks with backend (Flask API)
+  // const updateTask = async (taskId, updates) => {
+  //   await fetch('/api/production/tasks/' + taskId, { method: 'PATCH', body: JSON.stringify(updates) });
+  // };
+
   return (
     <div className="page-container">
       <h1 className="page-title">Production Board</h1>
-      <p className="page-subtitle">Track your project's progress from pre-production to post.</p>
+      <p className="page-subtitle">Track tasks across stages — Pre-Production, Production, Post-Production</p>
 
-      {!scriptData.uploadedScript ? (
+      {!board || Object.keys(board).length === 0 ? (
         <div className="empty-state-message">
-          <h3 className="section-heading">No Script Loaded</h3>
-          <p>Please upload a script in the Script Manager to view the Production Board.</p>
+          <h3 className="section-heading">No tasks available</h3>
+          <p>Use Script Manager to analyze scripts and populate production tasks.</p>
         </div>
       ) : (
         <div className="kanban-board">
-          {Object.entries(scriptData.productionBoard).map(([column, tasks]) => (
+          {Object.entries(board).map(([column, tasks]) => (
             <div key={column} className="kanban-column">
               <h3 className="column-title">{column}</h3>
               <div className="task-list">

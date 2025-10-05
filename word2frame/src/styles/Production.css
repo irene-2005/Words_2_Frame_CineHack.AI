@@ -7,7 +7,7 @@
 
 .page-title {
   font-size: 2.5rem;
-  color: #ffc759;
+  color: var(--accent);
   font-weight: 700;
   margin-bottom: 10px;
   letter-spacing: 1px;
@@ -44,13 +44,13 @@
 
 .card-icon {
   font-size: 3rem;
-  color: #ffc759;
+  color: var(--accent);
   margin-bottom: 15px;
 }
 
 .section-heading {
   font-size: 1.5rem;
-  color: #ffc759;
+  color: var(--accent);
   margin-top: 0;
   margin-bottom: 10px;
 }
@@ -61,12 +61,12 @@
 
 .empty-state-message {
   padding: 50px;
-  border: 2px dashed #ffc759;
+  border: 2px dashed var(--accent);
   border-radius: 12px;
   background-color: #1a1a1a;
   color: #e0e0e0;
 }
 
 .empty-state-message h3 {
-  color: #ffc759;
+  color: var(--accent);
 }

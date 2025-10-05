@@ -1,4 +1,14 @@
 /* General Body and Container Styles */
+:root {
+  /* Default color palette variables */
+  --bg: #121212;
+  --fg: #e0e0e0;
+  --accent: #ffc759;
+  --panel-bg: rgba(26,26,26,0.95);
+  --accent2: #ffc759;
+  --accent-contrast: #121212;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -6,8 +16,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #121212;
-  color: #e0e0e0;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 .app-container {
@@ -15,7 +25,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #121212;
+  background-color: var(--bg);
 }
 
 /* Loading Screen Styles */
@@ -28,8 +38,8 @@ body {
 }
 
 .loader-gif {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
 }
 
 /* --- New CSS-Only Clapboard Design --- */
@@ -64,18 +74,18 @@ body {
   background-color: #121212;
 }
 .stripe.golden {
-  background-color: #ffc759;
+  background-color: var(--accent);
 }
 
 .clapperboard-main {
   text-align: center;
   padding: 30px 20px;
-  color: #fff;
+  color: var(--fg);
   z-index: 1;
 }
 
 .clapperboard-title {
-  color: #ffc759;
+  color: var(--accent);
   font-size: 2.5rem;
   margin-bottom: 2rem;
   font-weight: 700;
@@ -90,7 +100,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  border: 5px solid #ffc759;
+  border: 5px solid var(--accent);
   border-radius: 0 0 10px 10px;
   z-index: -1;
 }
@@ -150,13 +160,13 @@ input::placeholder {
 
 .login-button {
   background-color: #2c2c2c;
-  color: #ffc759;
-  border: 2px solid #ffc759;
+  color: var(--accent);
+  border: 2px solid var(--accent);
 }
 
 .signup-button-alt {
-  background-color: #ffc759;
-  color: #121212;
+  background-color: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .login-button:hover {
@@ -166,6 +176,55 @@ input::placeholder {
 
 .signup-button-alt:hover {
   transform: translateY(-3px);
-  background-color: #c8a452;
+  background-color: color-mix(in srgb, var(--accent) 80%, black 20%);
 }
 
+/* Dashboard Header - styles are inline in App.js */
+
+/* Toast (non-blocking notification) */
+.site-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 30px;
+  background: var(--panel-bg);
+  color: var(--fg);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  z-index: 2000;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 220px;
+}
+.site-toast .toast-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+/* Accessibility modes */
+.ac-high-contrast {
+  /* High contrast mode variables */
+  --bg: #000000;
+  --fg: #ffffff;
+  --accent: #ffff00; /* bright yellow accent */
+  --accent2: #ffff00;
+  --accent-contrast: #000000;
+  --panel-bg: #000000;
+}
+
+.ac-colorblind {
+  /* Color-blind friendly palette: use blue/orange contrast */
+  --bg: #121212;
+  --fg: #e6eef8;
+  --accent: #0072b2; /* blue */
+  --accent2: #ffb000; /* secondary accent */
+  --accent-contrast: #000000;
+  --panel-bg: rgba(20,20,28,0.95);
+}
+
+/* Ensure default palette defined only once above (:root). Do not redefine --accent below to avoid overriding the original clapboard/golden color. */

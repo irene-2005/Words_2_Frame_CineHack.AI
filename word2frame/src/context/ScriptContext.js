@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
 export const ScriptContext = createContext();
 
@@ -99,8 +99,11 @@ export const ScriptProvider = ({ children }) => {
     productionBoard: null,
   });
 
+  // No dev helpers exposed in production — keep ScriptContext pure
+  useEffect(() => {}, [scriptData, setScriptData]);
+
   return (
-    <ScriptContext.Provider value={{ scriptData, setScriptData, DUMMY_SCRIPT_DATA }}>
+    <ScriptContext.Provider value={{ scriptData, setScriptData }}>
       {children}
     </ScriptContext.Provider>
   );

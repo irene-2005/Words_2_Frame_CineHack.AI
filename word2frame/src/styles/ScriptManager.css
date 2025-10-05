@@ -8,7 +8,7 @@
 
 .page-title {
   font-size: 2.5rem;
-  color: #ffc759;
+  color: var(--accent);
   font-weight: 700;
   margin-bottom: 30px;
   letter-spacing: 1px;
@@ -32,7 +32,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #ffc759;
+  border: 2px dashed var(--accent);
   border-radius: 12px;
   padding: 40px 60px;
   cursor: pointer;
@@ -48,7 +48,7 @@
 
 .upload-icon {
   font-size: 3rem;
-  color: #ffc759;
+  color: var(--accent);
   margin-bottom: 10px;
 }
 
@@ -79,7 +79,7 @@
 
 .uploaded-file-info {
   font-size: 1.2rem;
-  color: #ffc759;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -97,7 +97,7 @@
 
 .view-script-btn {
   background-color: #2a2a2a;
-  color: #ffc759;
+  color: var(--accent);
 }
 
 .view-script-btn:hover {
@@ -127,7 +127,7 @@
 }
 
 .filter-panel h2 {
-  color: #ffc759;
+  color: var(--accent);
   font-size: 1.5rem;
   margin-bottom: 20px;
 }
@@ -146,7 +146,7 @@
 }
 
 .dropdown-icon {
-  color: #ffc759;
+  color: var(--accent);
 }
 
 .breakdown-dropdown {
@@ -195,7 +195,7 @@
 
 .breakdown-header h3 {
   font-size: 1.2rem;
-  color: #ffc759;
+  color: var(--accent);
   margin: 0;
 }
 
@@ -212,7 +212,7 @@
 }
 
 .expanded-content h4 {
-  color: #ffc759;
+  color: var(--accent);
   font-size: 1rem;
   margin-top: 0;
   margin-bottom: 10px;
@@ -251,7 +251,7 @@
 }
 
 .modal-title {
-  color: #ffc759;
+  color: var(--accent);
   margin-top: 0;
   margin-bottom: 20px;
   text-align: center;
@@ -271,7 +271,7 @@
   right: 15px;
   background-color: transparent;
   border: none;
-  color: #ffc759;
+  color: var(--accent);
   font-size: 1.5rem;
   cursor: pointer;
 }

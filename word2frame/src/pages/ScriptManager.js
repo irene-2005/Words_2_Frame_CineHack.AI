@@ -4,24 +4,41 @@ import { ScriptContext } from "../context/ScriptContext";
 import { FaFileUpload, FaTimes, FaMapMarkerAlt, FaUser, FaTag } from "react-icons/fa";
 
 const ScriptManager = () => {
-  const { scriptData, setScriptData, DUMMY_SCRIPT_DATA } = useContext(ScriptContext);
+  const { scriptData, setScriptData } = useContext(ScriptContext);
   const [breakdownData, setBreakdownData] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   // ✅ Corrected: initialize filteredScenes with an empty array or the current sceneData
-  const [filteredScenes, setFilteredScenes] = useState(scriptData.sceneData || []);
+  const [filteredScenes, setFilteredScenes] = useState(scriptData?.sceneData || []);
+  const hasScript = !!(scriptData && scriptData.uploadedScript);
   
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedCharacter, setSelectedCharacter] = useState("");
   const [selectedProp, setSelectedProp] = useState("");
 
   const handleFileUpload = (event) => {
-    // This function simulates the script upload and analysis
-    setTimeout(() => {
-      setScriptData({
-        ...DUMMY_SCRIPT_DATA,
-      });
-      alert("Script uploaded and analyzed!");
-    }, 500); // Small delay for a realistic feel
+    // This function simulates the script upload and analysis.
+    // In production, upload the file to Firebase Storage and then send the file/text to the Flask AI backend for analysis.
+    // --- Firebase upload (commented) ---
+    // const storageRef = ref(storage, `scripts/${file.name}`);
+    // await uploadBytes(storageRef, file);
+    // const url = await getDownloadURL(storageRef);
+
+    // --- Flask AI breakdown call (commented) ---
+    // const response = await fetch('https://your-flask-backend/predict_breakdown', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ fileUrl: url }),
+    //   headers: { 'Content-Type': 'application/json' }
+    // });
+    // const aiBreakdown = await response.json();
+    // setScriptData({ uploadedScript: { name: file.name, url }, sceneData: aiBreakdown.scenes, budget: aiBreakdown.budget });
+
+  const file = event.target.files[0];
+    // Set uploaded script metadata; the backend/AI will populate sceneData and budget
+    setScriptData(prev => ({
+      ...prev,
+      uploadedScript: { name: file?.name || 'Uploaded Script' },
+    }));
+    if (typeof window !== 'undefined' && window.showSiteToast) window.showSiteToast('Script uploaded. Analysis will run on the backend.');
   };
 
   const handleRemoveScript = () => {
@@ -36,11 +53,14 @@ const ScriptManager = () => {
   const toggleExpand = (i) => setExpandedIndex(expandedIndex === i ? null : i);
 
   useEffect(() => {
-    if (scriptData.sceneData && scriptData.sceneData.length > 0) {
+    if (scriptData?.sceneData && scriptData.sceneData.length > 0) {
       setBreakdownData(scriptData.sceneData);
       setFilteredScenes(scriptData.sceneData);
+    } else {
+      setBreakdownData([]);
+      setFilteredScenes([]);
     }
-  }, [scriptData.sceneData]);
+  }, [scriptData]);
 
   useEffect(() => {
     let tempScenes = breakdownData || [];
@@ -66,7 +86,7 @@ const ScriptManager = () => {
       <h1 className="page-title">🎬 Script Manager</h1>
       <p className="page-subtitle">Instantly analyze your screenplay for production readiness.</p>
 
-      {!scriptData.uploadedScript ? (
+  {!scriptData?.uploadedScript ? (
         <div className="upload-section">
           <label htmlFor="script-upload" className="upload-box">
             <FaFileUpload className="upload-icon" />
@@ -84,8 +104,8 @@ const ScriptManager = () => {
       ) : (
         <div className="script-view-section">
           <div className="action-row">
-            <div className="uploaded-file-info">
-              <strong>{scriptData.uploadedScript.name}</strong> uploaded.
+              <div className="uploaded-file-info">
+              <strong>{scriptData?.uploadedScript?.name}</strong> uploaded.
             </div>
             <button onClick={handleRemoveScript} className="action-button remove-script-btn">
               <FaTimes /> Remove Script
@@ -148,7 +168,7 @@ const ScriptManager = () => {
               )}
             </div>
             <div style={{ marginTop: 24, textAlign: 'right' }}>
-              <h3 style={{ color: '#FFC759' }}>Estimated Total Budget: ₹{scriptData?.budget?.total?.toLocaleString('en-IN') || 0}</h3>
+              <h3 style={{ color: 'var(--accent)' }}>Estimated Total Budget: ₹{scriptData?.budget?.total?.toLocaleString('en-IN') || 0}</h3>
             </div>
           </div>
         </div>
