@@ -1,46 +1,97 @@
-import React, { useContext, useState } from 'react';
-import { ScriptContext } from '../context/ScriptContext';
-
-const departments = [
-  'Production',
-  'Camera',
-  'Lighting',
-  'Sound',
-  'Editing',
-  'VFX',
-  'Art Department',
-];
+import React, { useContext, useState, useEffect } from "react";
+import { ScriptContext } from "../context/ScriptContext";
+import { FaUserPlus, FaUser, FaTimes } from "react-icons/fa";
+import "../styles/other-pages.css";
 
 const CrewManagement = () => {
   const { scriptData, setScriptData } = useContext(ScriptContext);
-  const [assignments, setAssignments] = useState(() => scriptData?.crewList?.reduce((acc, cur) => ({ ...acc, [cur.role]: cur.name }), {}) || {});
+  const [crewList, setCrewList] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newCrewName, setNewCrewName] = useState("");
+  const [newCrewRole, setNewCrewRole] = useState("");
 
-  const handleAssign = (role, name) => {
-    const next = { ...assignments, [role]: name };
-    setAssignments(next);
-    const crewList = Object.keys(next).map((r) => ({ role: r, name: next[r] }));
-    setScriptData((prev) => ({ ...prev, crewList }));
+  useEffect(() => {
+    if (scriptData.crew) {
+      setCrewList(scriptData.crew);
+    }
+  }, [scriptData.crew]);
+
+  const handleAddCrew = () => {
+    if (newCrewName && newCrewRole) {
+      const newMember = { name: newCrewName, role: newCrewRole };
+      const updatedCrew = [...crewList, newMember];
+      setCrewList(updatedCrew);
+  
+      setScriptData(prev => ({
+        ...prev,
+        crew: updatedCrew
+      }));
+
+      setNewCrewName("");
+      setNewCrewRole("");
+      setShowModal(false);
+    } else {
+      alert("Please enter both name and role.");
+    }
   };
 
   return (
-    <div style={{ textAlign: 'left' }}>
-      <h2 style={{ color: '#FFC759' }}>Crew Management</h2>
-      <p style={{ color: '#ccc' }}>Assign leads for each department</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        {departments.map((d) => (
-          <div key={d} style={{ background: '#0f0f0f', padding: 12, borderRadius: 8 }}>
-            <strong style={{ color: '#fff' }}>{d}</strong>
-            <div style={{ marginTop: 8 }}>
-              <input
-                placeholder={`Assign ${d} lead`}
-                value={assignments[d] || ''}
-                onChange={(e) => handleAssign(d, e.target.value)}
-                style={{ width: '100%', padding: 8, borderRadius: 6, background: '#111', color: '#fff', border: '1px solid #222' }}
-              />
-            </div>
+    <div className="page-container">
+      <h1 className="page-title">Crew Management</h1>
+      <p className="page-subtitle">Manage your cast and crew assignments.</p>
+
+      {!scriptData.uploadedScript ? (
+        <div className="empty-state-message">
+          <h3 className="section-heading">No Script Loaded</h3>
+          <p>Please upload a script in the Script Manager to manage your crew.</p>
+        </div>
+      ) : (
+        <div className="crew-section">
+          <div className="crew-list">
+            {crewList.map((member, index) => (
+              <div key={index} className="crew-card">
+                <FaUser className="card-icon" />
+                <h3>{member.name}</h3>
+                <p>{member.role}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <div className="add-crew-card" onClick={() => setShowModal(true)}>
+            <FaUserPlus className="card-icon" />
+            <h3>Add New Crew Member</h3>
+          </div>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">Add Crew Member</h2>
+            <div className="modal-form">
+              <div className="form-row">
+                <label>Name</label>
+                <input
+                  type="text"
+                  value={newCrewName}
+                  onChange={(e) => setNewCrewName(e.target.value)}
+                  placeholder="e.g., John Doe"
+                />
+              </div>
+              <div className="form-row">
+                <label>Role</label>
+                <input
+                  type="text"
+                  value={newCrewRole}
+                  onChange={(e) => setNewCrewRole(e.target.value)}
+                  placeholder="e.g., Director"
+                />
+              </div>
+              <button className="action-button add-button" onClick={handleAddCrew}>Add Crew</button>
+            </div>
+            <button className="close-modal-btn" onClick={() => setShowModal(false)}><FaTimes /></button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

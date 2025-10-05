@@ -1,146 +1,155 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import "../styles/ScriptManager.css";
 import { ScriptContext } from "../context/ScriptContext";
-
-
-const estimateBudget = (scenes) => {
-  // Dummy budget per scene: base + per-character + prop cost
-  const perScene = scenes.map((s, idx) => {
-    const base = 1500 + idx * 100; // small variance
-    const perChar = (s.characters?.length || 0) * 300;
-    const perProp = (s.props?.length || 0) * 50;
-    const locationCost = s.location === "Beach" ? 700 : s.location === "Street" ? 300 : 400;
-    const sceneTotal = base + perChar + perProp + locationCost;
-    return { scene: s.scene, total: sceneTotal };
-  });
-  const total = perScene.reduce((sum, p) => sum + p.total, 0);
-  return { total, perScene };
-};
+import { FaFileUpload, FaTimes, FaMapMarkerAlt, FaUser, FaTag } from "react-icons/fa";
 
 const ScriptManager = () => {
-  const { scriptData, setScriptData } = useContext(ScriptContext);
-  const [selectedFile, setSelectedFile] = useState(scriptData.uploadedScript || null);
-  const [breakdownData, setBreakdownData] = useState(scriptData.sceneData || []);
+  const { scriptData, setScriptData, DUMMY_SCRIPT_DATA } = useContext(ScriptContext);
+  const [breakdownData, setBreakdownData] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
+  // ✅ Corrected: initialize filteredScenes with an empty array or the current sceneData
+  const [filteredScenes, setFilteredScenes] = useState(scriptData.sceneData || []);
+  
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedCharacter, setSelectedCharacter] = useState("");
+  const [selectedProp, setSelectedProp] = useState("");
 
   const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    setSelectedFile(file);
+    // This function simulates the script upload and analysis
+    setTimeout(() => {
+      setScriptData({
+        ...DUMMY_SCRIPT_DATA,
+      });
+      alert("Script uploaded and analyzed!");
+    }, 500); // Small delay for a realistic feel
+  };
 
-    // Do not auto-generate breakdowns. Only persist uploaded file metadata.
-    setScriptData((prev) => ({
-      ...prev,
-      uploadedScript: file ? { name: file.name } : null,
-    }));
+  const handleRemoveScript = () => {
+    setScriptData({ uploadedScript: null, sceneData: [], budget: null, scheduleData: [], crew: [], reports: null, productionBoard: null });
+    setBreakdownData([]);
+    setFilteredScenes([]);
+    setSelectedLocation("");
+    setSelectedCharacter("");
+    setSelectedProp("");
   };
 
   const toggleExpand = (i) => setExpandedIndex(expandedIndex === i ? null : i);
 
-  const updateSceneCharacters = (i, val) => {
-    const copy = [...breakdownData];
-    copy[i].characters = val.split(",").map((c) => c.trim()).filter(Boolean);
-    setBreakdownData(copy);
-    const budget = estimateBudget(copy);
-    setScriptData((prev) => ({ ...prev, sceneData: copy, budget }));
-  };
+  useEffect(() => {
+    if (scriptData.sceneData && scriptData.sceneData.length > 0) {
+      setBreakdownData(scriptData.sceneData);
+      setFilteredScenes(scriptData.sceneData);
+    }
+  }, [scriptData.sceneData]);
+
+  useEffect(() => {
+    let tempScenes = breakdownData || [];
+    
+    if (selectedLocation) {
+      tempScenes = tempScenes.filter((s) => s.location === selectedLocation);
+    }
+    if (selectedCharacter) {
+      tempScenes = tempScenes.filter((s) => [...s.characters].includes(selectedCharacter));
+    }
+    if (selectedProp) {
+      tempScenes = tempScenes.filter((s) => [...s.props].includes(selectedProp));
+    }
+    setFilteredScenes(tempScenes);
+  }, [selectedLocation, selectedCharacter, selectedProp, breakdownData]);
+  
+  const locations = [...new Set(breakdownData.map(s => s.location))];
+  const characters = [...new Set(breakdownData.flatMap(s => [...s.characters]))];
+  const props = [...new Set(breakdownData.flatMap(s => [...s.props]))];
 
   return (
-    <div className="scriptmanager-container">
+    <div className="page-container">
       <h1 className="page-title">🎬 Script Manager</h1>
+      <p className="page-subtitle">Instantly analyze your screenplay for production readiness.</p>
 
-      <div className="upload-section">
-        <label htmlFor="script-upload" className="upload-box">
-          {selectedFile ? (
-            <p>
-              <strong>{selectedFile.name}</strong> uploaded successfully!
-            </p>
-          ) : (
-            <p>Click to upload your script (PDF, DOCX, or TXT)</p>
-          )}
-        </label>
-        <input
-          type="file"
-          id="script-upload"
-          accept=".pdf,.docx,.txt"
-          onChange={handleFileUpload}
-          style={{ display: "none" }}
-        />
-        <div style={{ marginLeft: 20, display: 'flex', gap: 10, alignItems: 'center' }}>
-          <div>
-            <input
-              placeholder="Scene Name"
-              id="new-scene-name"
-              style={{ padding: 8, borderRadius: 8, border: '1px solid #333', background: '#0f0f0f', color: '#fff' }}
-            />
-          </div>
-          <div>
-            <input
-              placeholder="Location"
-              id="new-scene-location"
-              style={{ padding: 8, borderRadius: 8, border: '1px solid #333', background: '#0f0f0f', color: '#fff' }}
-            />
-          </div>
-          <div>
-            <button
-              className="upload-box"
-              onClick={() => {
-                const name = document.getElementById('new-scene-name').value.trim();
-                const location = document.getElementById('new-scene-location').value.trim();
-                if (!name) return alert('Please provide a scene name');
-                const newScene = { scene: name, location: location || 'Unknown', characters: [], time: 'Day', props: [] };
-                const updated = [...(breakdownData || []), newScene];
-                const budget = estimateBudget(updated);
-                setBreakdownData(updated);
-                setScriptData((prev) => ({ ...prev, sceneData: updated, budget }));
-                document.getElementById('new-scene-name').value = '';
-                document.getElementById('new-scene-location').value = '';
-              }}
-            >
-              Add Scene
+      {!scriptData.uploadedScript ? (
+        <div className="upload-section">
+          <label htmlFor="script-upload" className="upload-box">
+            <FaFileUpload className="upload-icon" />
+            <span>Click to Upload Script</span>
+            <p className="upload-info">.txt, .pdf, .docx</p>
+          </label>
+          <input
+            type="file"
+            id="script-upload"
+            accept=".pdf,.docx,.txt"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+          />
+        </div>
+      ) : (
+        <div className="script-view-section">
+          <div className="action-row">
+            <div className="uploaded-file-info">
+              <strong>{scriptData.uploadedScript.name}</strong> uploaded.
+            </div>
+            <button onClick={handleRemoveScript} className="action-button remove-script-btn">
+              <FaTimes /> Remove Script
             </button>
           </div>
-        </div>
-      </div>
-
-      {breakdownData && breakdownData.length > 0 && (
-        <div className="breakdown-section">
-          <div className="breakdown-header-row">
-            <h2>Script Breakdown</h2>
-            <select className="breakdown-dropdown">
-              <option>All Scenes</option>
-              {breakdownData.map((item, index) => (
-                <option key={index}>{item.scene}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="breakdown-grid">
-            {breakdownData.map((item, index) => (
-              <div className="breakdown-card" key={index} onClick={() => toggleExpand(index)}>
-                <div className="breakdown-header">
-                  <h3>{item.scene}</h3>
-                  <span>📍 {item.location}</span>
+          
+          <div className="breakdown-section">
+            <div className="filter-panel">
+              <h2>Filter Breakdown</h2>
+              <div className="filter-dropdowns">
+                <div className="dropdown-wrapper">
+                  <FaMapMarkerAlt className="dropdown-icon" />
+                  <select className="breakdown-dropdown" onChange={(e) => setSelectedLocation(e.target.value)} value={selectedLocation}>
+                    <option value="">All Locations</option>
+                    {locations.map((loc, index) => <option key={index} value={loc}>{loc}</option>)}
+                  </select>
                 </div>
-                <div className="scene-summary">
-                  <p>⏱️ {item.time}</p>
-                  <p>🎭 Characters: {item.characters.join(", ")}</p>
-                  <p>🎒 Props: {item.props.join(", ")}</p>
+                <div className="dropdown-wrapper">
+                  <FaUser className="dropdown-icon" />
+                  <select className="breakdown-dropdown" onChange={(e) => setSelectedCharacter(e.target.value)} value={selectedCharacter}>
+                    <option value="">All Cast</option>
+                    {characters.map((char, index) => (
+                      <option key={index} value={char}>{char}</option>
+                    ))}
+                  </select>
                 </div>
-                {expandedIndex === index && (
-                  <div className="expanded-content">
-                    <h4>Budget Estimate: ${scriptData?.budget?.perScene?.find(p => p.scene === item.scene)?.total || 0}</h4>
-                    <label>Characters (comma separated)</label>
-                    <input type="text" value={item.characters.join(", ")}
-                      onChange={(e) => updateSceneCharacters(index, e.target.value)} />
-                    <p style={{ marginTop: 8 }}><strong>Props:</strong> {item.props.join(", ")}</p>
-                  </div>
-                )}
+                <div className="dropdown-wrapper">
+                  <FaTag className="dropdown-icon" />
+                  <select className="breakdown-dropdown" onChange={(e) => setSelectedProp(e.target.value)} value={selectedProp}>
+                    <option value="">All Props</option>
+                    {props.map((prop, index) => (
+                      <option key={index} value={prop}>{prop}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          <div style={{ marginTop: 24, textAlign: 'right' }}>
-            <h3 style={{ color: '#FFC759' }}>Estimated Total Budget: ${scriptData?.budget?.total || 0}</h3>
+            <div className="breakdown-grid">
+              {filteredScenes.length > 0 ? (
+                filteredScenes.map((item, index) => (
+                  <div className="breakdown-card" key={index} onClick={() => toggleExpand(index)}>
+                    <div className="breakdown-header">
+                      <h3>{item.scene}</h3>
+                      <span>📍 {item.location}</span>
+                    </div>
+                    <div className="scene-summary">
+                      <p>🎭 Cast: {item.characters.size > 0 ? [...item.characters].join(", ") : "N/A"}</p>
+                      <p>🎒 Props: {item.props.size > 0 ? [...item.props].join(", ") : "N/A"}</p>
+                    </div>
+                    {expandedIndex === index && (
+                      <div className="expanded-content">
+                        <h4>Budget Estimate: ₹{scriptData?.budget?.perScene?.find(p => p.scene === item.scene)?.total?.toLocaleString('en-IN') || 0}</h4>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="no-scenes-message">No scenes found matching the filter criteria.</p>
+              )}
+            </div>
+            <div style={{ marginTop: 24, textAlign: 'right' }}>
+              <h3 style={{ color: '#FFC759' }}>Estimated Total Budget: ₹{scriptData?.budget?.total?.toLocaleString('en-IN') || 0}</h3>
+            </div>
           </div>
         </div>
       )}
