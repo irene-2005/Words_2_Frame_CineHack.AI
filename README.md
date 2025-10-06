@@ -17,8 +17,14 @@ Words2Frame is an **AI-integrated film production management system** that autom
 
 ### 🧩 **Brief Description**
 
-Built using **Python Flask, React, and Firebase**, Words2Frame enables directors or production leads to upload scripts, automatically break them down scene-by-scene using NLP, generate predictive budget insights, and manage cast, crew, and production timelines seamlessly — all in one interactive dashboard.
+Words 2 Frame is an AI-powered integrated production management system that streamlines every stage of filmmaking—from pre-production to post-release. It features AI-based budget prediction, smart scheduling, real-time finance tracking, and an intuitive dashboard for efficient team collaboration.
 
+Built with accessibility in mind, it includes colorblind-friendly themes and night-mode compatibility for an inclusive user experience. Future enhancements include AI chat assistants, weather-based shoot scheduling, and automated reminders via email or SMS.
+
+Developed as a scalable startup concept, it aims to empower studios and creators worldwide.
+Team: Ann (Frontend), Athira (AI), Irene (Backend).
+
+Turning words into cinematic frames — powered by intelligence
 ---
 
 ### 🌐 **Live Demo**
