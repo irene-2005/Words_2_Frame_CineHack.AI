@@ -136,9 +136,35 @@ export const ScriptProvider = ({ children, session }) => {
     setLastAnalyzedFilename(uploadedName);
   }, []);
 
+  const resolveProject = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!authToken) {
+        return null;
+      }
+      try {
+        const projectResponse = await fetchDefaultProject(authToken);
+        if (projectResponse?.id) {
+          setProjectId(projectResponse.id);
+          setProject(projectResponse);
+          return projectResponse.id;
+        }
+      } catch (error) {
+        if (!silent) {
+          showToast(error.message || "Unable to resolve default project");
+        }
+      }
+      if (DEFAULT_PROJECT_ID) {
+        setProjectId(DEFAULT_PROJECT_ID);
+        return DEFAULT_PROJECT_ID;
+      }
+      return null;
+    },
+    [authToken, showToast]
+  );
+
   const refreshSnapshot = useCallback(
-    async (overrideProjectId) => {
-      const targetId = overrideProjectId || projectId;
+    async (overrideProjectId, { allowRetry = true, silent = false } = {}) => {
+      const targetId = overrideProjectId ?? projectId;
       if (!authToken || !targetId) {
         return null;
       }
@@ -155,35 +181,22 @@ export const ScriptProvider = ({ children, session }) => {
         }
         return normalised;
       } catch (error) {
-        showToast(error.message || "Unable to load project snapshot");
+        if (error?.status === 404 && allowRetry) {
+          const fallbackId = await resolveProject({ silent: true });
+          if (fallbackId && fallbackId !== targetId) {
+            return refreshSnapshot(fallbackId, { allowRetry: false, silent });
+          }
+        }
+        if (!silent) {
+          showToast(error.message || "Unable to load project snapshot");
+        }
         throw error;
       } finally {
         setIsLoadingSnapshot(false);
       }
     },
-    [authToken, projectId, normaliseSnapshot, applySnapshot, showToast]
+    [authToken, projectId, normaliseSnapshot, applySnapshot, resolveProject, showToast]
   );
-
-  const resolveProject = useCallback(async () => {
-    if (!authToken) {
-      return null;
-    }
-    try {
-      const projectResponse = await fetchDefaultProject(authToken);
-      if (projectResponse?.id) {
-        setProjectId(projectResponse.id);
-        setProject(projectResponse);
-        return projectResponse.id;
-      }
-    } catch (error) {
-      showToast(error.message || "Unable to resolve default project");
-    }
-    if (DEFAULT_PROJECT_ID) {
-      setProjectId(DEFAULT_PROJECT_ID);
-      return DEFAULT_PROJECT_ID;
-    }
-    return null;
-  }, [authToken, showToast]);
 
   useEffect(() => {
     let cancelled = false;

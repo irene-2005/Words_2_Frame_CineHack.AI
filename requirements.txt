@@ -16,3 +16,4 @@ PyPDF2==3.0.1
 python-dateutil
 pillow
 pdfminer.six==20250506
+psycopg2-binary==2.9.10
