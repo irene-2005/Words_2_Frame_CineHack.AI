@@ -11,8 +11,12 @@ const CrewManagement = () => {
   const [newCrewRole, setNewCrewRole] = useState("");
 
   useEffect(() => {
-    if (scriptData?.crew) {
-      setCrewList(scriptData.crew);
+    if (scriptData?.crew || scriptData?.actors) {
+      const combined = [
+        ...(scriptData.crew || []),
+        ...(scriptData.actors || []),
+      ];
+      setCrewList(combined);
     } else {
       setCrewList([]);
     }
@@ -21,8 +25,10 @@ const CrewManagement = () => {
   const handleAddCrew = () => {
     if (newCrewName && newCrewRole) {
       const newMember = { name: newCrewName, role: newCrewRole };
-      const updatedCrew = [...crewList, newMember];
-      setCrewList(updatedCrew);
+      const currentCrew = scriptData?.crew || [];
+      const updatedCrew = [...currentCrew, newMember];
+      const combinedForDisplay = [...updatedCrew, ...(scriptData?.actors || [])];
+      setCrewList(combinedForDisplay);
   
       setScriptData(prev => ({
         ...prev,

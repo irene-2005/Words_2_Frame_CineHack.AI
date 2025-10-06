@@ -1,48 +1,65 @@
 import React, { useState, useContext, useEffect } from "react";
 import "../styles/ScriptManager.css";
-import { ScriptContext } from "../context/ScriptContext";
 import { FaFileUpload, FaTimes, FaMapMarkerAlt, FaUser, FaTag } from "react-icons/fa";
+import { supabase } from "../supabaseClient";
+import { ScriptContext } from "../context/ScriptContext";
 
 const ScriptManager = () => {
-  const { scriptData, setScriptData } = useContext(ScriptContext);
+  const {
+    scriptData,
+    setScriptData,
+    project,
+    runScriptBreakdown,
+    uploadAndAnalyze,
+    analysisStatus,
+    statusMessage,
+    isLoadingSnapshot,
+  } = useContext(ScriptContext);
+  const [authToken, setAuthToken] = useState(null);
   const [breakdownData, setBreakdownData] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
-  // ✅ Corrected: initialize filteredScenes with an empty array or the current sceneData
   const [filteredScenes, setFilteredScenes] = useState(scriptData?.sceneData || []);
-  const hasScript = !!(scriptData && scriptData.uploadedScript);
-  
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedCharacter, setSelectedCharacter] = useState("");
   const [selectedProp, setSelectedProp] = useState("");
 
-  const handleFileUpload = (event) => {
-    // This function simulates the script upload and analysis.
-    // In production, upload the file to Firebase Storage and then send the file/text to the Flask AI backend for analysis.
-    // --- Firebase upload (commented) ---
-    // const storageRef = ref(storage, `scripts/${file.name}`);
-    // await uploadBytes(storageRef, file);
-    // const url = await getDownloadURL(storageRef);
+  const handleFileUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !authToken) return;
+    try {
+      await uploadAndAnalyze(file);
+      if (typeof window !== "undefined" && window.showSiteToast) {
+        window.showSiteToast("Script uploaded and analyzed successfully.");
+      }
+    } catch (error) {
+      if (typeof window !== "undefined" && window.showSiteToast) {
+        window.showSiteToast(error.message || "Script upload failed");
+      }
+    } finally {
+      event.target.value = "";
+    }
+  };
 
-    // --- Flask AI breakdown call (commented) ---
-    // const response = await fetch('https://your-flask-backend/predict_breakdown', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ fileUrl: url }),
-    //   headers: { 'Content-Type': 'application/json' }
-    // });
-    // const aiBreakdown = await response.json();
-    // setScriptData({ uploadedScript: { name: file.name, url }, sceneData: aiBreakdown.scenes, budget: aiBreakdown.budget });
-
-  const file = event.target.files[0];
-    // Set uploaded script metadata; the backend/AI will populate sceneData and budget
-    setScriptData(prev => ({
-      ...prev,
-      uploadedScript: { name: file?.name || 'Uploaded Script' },
-    }));
-    if (typeof window !== 'undefined' && window.showSiteToast) window.showSiteToast('Script uploaded. Analysis will run on the backend.');
+  const handleAnalyzeScript = async () => {
+    if (!scriptData.uploadedScript?.name) return;
+    try {
+      await runScriptBreakdown();
+    } catch (error) {
+      // Error is handled in context
+    }
   };
 
   const handleRemoveScript = () => {
-    setScriptData({ uploadedScript: null, sceneData: [], budget: null, scheduleData: [], crew: [], reports: null, productionBoard: null });
+    setScriptData({
+      uploadedScript: null,
+      sceneData: [],
+      budget: { total: 0, perScene: [] },
+      scheduleData: [],
+      crew: [],
+      actors: [],
+      reports: null,
+      productionBoard: {},
+    });
     setBreakdownData([]);
     setFilteredScenes([]);
     setSelectedLocation("");
@@ -51,6 +68,20 @@ const ScriptManager = () => {
   };
 
   const toggleExpand = (i) => setExpandedIndex(expandedIndex === i ? null : i);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setAuthToken(session?.access_token || null);
+    };
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthToken(session?.access_token || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (scriptData?.sceneData && scriptData.sceneData.length > 0) {
@@ -72,23 +103,40 @@ const ScriptManager = () => {
       tempScenes = tempScenes.filter((s) => [...s.characters].includes(selectedCharacter));
     }
     if (selectedProp) {
-      tempScenes = tempScenes.filter((s) => [...s.props].includes(selectedProp));
+      tempScenes = tempScenes.filter((s) => [...(s.props || [])].includes(selectedProp));
     }
     setFilteredScenes(tempScenes);
   }, [selectedLocation, selectedCharacter, selectedProp, breakdownData]);
   
-  const locations = [...new Set(breakdownData.map(s => s.location))];
-  const characters = [...new Set(breakdownData.flatMap(s => [...s.characters]))];
-  const props = [...new Set(breakdownData.flatMap(s => [...s.props]))];
+  const locations = [...new Set(breakdownData.map((s) => s.location))];
+  const characters = [
+    ...new Set(
+      breakdownData.flatMap((s) => (s.characters ? [...s.characters] : []))
+    ),
+  ];
+  const props = [
+    ...new Set(breakdownData.flatMap((s) => (s.props ? [...s.props] : []))),
+  ];
+
+  const isBusy = analysisStatus === "uploading" || analysisStatus === "analyzing" || isLoadingSnapshot;
 
   return (
     <div className="page-container">
       <h1 className="page-title">🎬 Script Manager</h1>
       <p className="page-subtitle">Instantly analyze your screenplay for production readiness.</p>
 
+      {analysisStatus !== "idle" && statusMessage && (
+        <div className={`analysis-status analysis-${analysisStatus}`}>
+          {statusMessage}
+        </div>
+      )}
+
   {!scriptData?.uploadedScript ? (
         <div className="upload-section">
-          <label htmlFor="script-upload" className="upload-box">
+          <label
+            htmlFor="script-upload"
+            className={`upload-box${isBusy ? " is-disabled" : ""}`}
+          >
             <FaFileUpload className="upload-icon" />
             <span>Click to Upload Script</span>
             <p className="upload-info">.txt, .pdf, .docx</p>
@@ -99,17 +147,30 @@ const ScriptManager = () => {
             accept=".pdf,.docx,.txt"
             onChange={handleFileUpload}
             style={{ display: "none" }}
+            disabled={isBusy || !authToken}
           />
         </div>
       ) : (
         <div className="script-view-section">
           <div className="action-row">
-              <div className="uploaded-file-info">
-              <strong>{scriptData?.uploadedScript?.name}</strong> uploaded.
+            <div className="uploaded-file-info">
+              <strong>{scriptData?.uploadedScript?.name}</strong> uploaded
+              {project?.name ? <span style={{ marginLeft: 12, color: '#b3b3b3' }}>({project.name})</span> : null}.
             </div>
-            <button onClick={handleRemoveScript} className="action-button remove-script-btn">
-              <FaTimes /> Remove Script
-            </button>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {scriptData?.uploadedScript && analysisStatus !== "analyzing" && (
+                <button
+                  onClick={handleAnalyzeScript}
+                  className="action-button view-script-btn"
+                  disabled={isBusy}
+                >
+                  Re-Analyze Script
+                </button>
+              )}
+              <button onClick={handleRemoveScript} className="action-button remove-script-btn" disabled={isBusy}>
+                <FaTimes /> Remove Script
+              </button>
+            </div>
           </div>
           
           <div className="breakdown-section">
@@ -145,7 +206,11 @@ const ScriptManager = () => {
             </div>
 
             <div className="breakdown-grid">
-              {filteredScenes.length > 0 ? (
+              {filteredScenes.length === 0 ? (
+                <p className="no-scenes-message">No scenes found. This might be a synopsis or non-script document.</p>
+              ) : filteredScenes.length === 1 && filteredScenes[0].summary?.includes('%PDF') ? (
+                <p className="no-scenes-message">This document appears to be a PDF synopsis. Scene breakdown is not available for synopsis documents.</p>
+              ) : (
                 filteredScenes.map((item, index) => (
                   <div className="breakdown-card" key={index} onClick={() => toggleExpand(index)}>
                     <div className="breakdown-header">
@@ -163,8 +228,6 @@ const ScriptManager = () => {
                     )}
                   </div>
                 ))
-              ) : (
-                <p className="no-scenes-message">No scenes found matching the filter criteria.</p>
               )}
             </div>
             <div style={{ marginTop: 24, textAlign: 'right' }}>

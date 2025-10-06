@@ -1,8 +1,11 @@
-// Lightweight Supabase client wrapper (placeholder)
-// Fill REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY in your .env file
+// Lightweight Supabase client wrapper using env vars set in .env
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase URL and Key are required');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey);

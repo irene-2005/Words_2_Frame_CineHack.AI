@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaCog, FaUser, FaEnvelope, FaLock, FaCheckCircle } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaCheckCircle } from "react-icons/fa";
 import "../styles/other-pages.css";
 
 const Settings = () => {

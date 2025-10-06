@@ -32,9 +32,16 @@ function App() {
     // Initial loading screen timeout
     setTimeout(() => setLoading(false), 3000);
 
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session) {
+        setSession(data.session);
+      }
+    });
+
     // Supabase session listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setLoading(false);
     });
 
     // Apply saved accessibility mode if present
@@ -233,7 +240,7 @@ function App() {
               </div>
             </header>
 
-            <ScriptProvider>
+            <ScriptProvider session={session}>
               <main style={{ padding: "40px", textAlign: "center", color: "white" }}>
                 <Routes>
                   <Route path="/" element={<Home />} />
@@ -284,8 +291,8 @@ function App() {
                 </form>
               ) : (
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                  <button className="login-button" onClick={() => { setIsSigningUp(false); setShowForm(true); }}>Login</button>
-                  <button className="signup-button-alt" onClick={() => { setIsSigningUp(true); setShowForm(true); }}>Sign Up</button>
+                  <button className="login-button" onClick={() => handleShowForm(false)}>Login</button>
+                  <button className="signup-button-alt" onClick={() => handleShowForm(true)}>Sign Up</button>
                 </div>
               )}
             </div>

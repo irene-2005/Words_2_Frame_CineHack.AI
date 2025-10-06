@@ -275,3 +275,38 @@
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+.analysis-status {
+  margin: 0 auto 30px;
+  max-width: 680px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background-color: rgba(42, 42, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f0f0f0;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  font-weight: 500;
+}
+
+.analysis-status.analysis-uploading,
+.analysis-status.analysis-analyzing {
+  border-color: rgba(255, 200, 87, 0.4);
+  color: #ffe8a3;
+}
+
+.analysis-status.analysis-completed {
+  border-color: rgba(126, 217, 87, 0.35);
+  color: #d3ffce;
+}
+
+.analysis-status.analysis-error {
+  border-color: rgba(255, 99, 99, 0.35);
+  color: #ffcccc;
+}
+
+.upload-box.is-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(0.2);
+}

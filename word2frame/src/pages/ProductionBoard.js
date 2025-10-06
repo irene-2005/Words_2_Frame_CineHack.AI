@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { ScriptContext } from '../context/ScriptContext';
-import { FaPlus, FaCircle } from 'react-icons/fa';
+import { FaCircle } from 'react-icons/fa';
 import '../styles/Production.css';
 
 const ProductionBoard = () => {

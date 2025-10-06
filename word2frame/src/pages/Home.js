@@ -1,15 +1,30 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Calendar from 'react-calendar';
 import '../styles/home.css';
 import 'react-calendar/dist/Calendar.css';
 import { ScriptContext } from '../context/ScriptContext';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  const { scriptData } = useContext(ScriptContext);
+  const { scriptData, createNewProject, isCreatingProject } = useContext(ScriptContext);
   const [date, setDate] = useState(new Date());
+  const navigate = useNavigate();
   // Only show real script data (no demo fallback)
   const hasScript = !!(scriptData && scriptData.uploadedScript);
+
+  const handleStartProject = async () => {
+    try {
+      const project = await createNewProject();
+      if (project) {
+        navigate('/script-manager');
+      }
+    } catch (error) {
+      if (typeof window !== 'undefined' && typeof window.showSiteToast === 'function') {
+        window.showSiteToast(error.message || 'Unable to start a new project');
+      }
+    }
+  };
 
   // 🔗 TODO: Connect to Firebase to fetch project data
   // useEffect(() => {
@@ -70,8 +85,13 @@ const Home = () => {
         <div className="empty-state-message">
           <h3 className="section-heading">No Script Loaded</h3>
           <p>Please upload a script in the Script Manager to view the dashboard.</p>
-          <button className="action-button view-script-btn" disabled style={{ marginTop: 12 }}>
-            Start New Project
+          <button
+            className="action-button view-script-btn"
+            onClick={handleStartProject}
+            disabled={isCreatingProject}
+            style={{ marginTop: 12 }}
+          >
+            {isCreatingProject ? 'Creating...' : 'Start New Project'}
           </button>
         </div>
       )}

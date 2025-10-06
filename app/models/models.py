@@ -15,6 +15,11 @@ class Project(Base):
     scenes = relationship("Scene", back_populates="project")
     actors = relationship("Actor", back_populates="project")
     properties = relationship("Property", back_populates="project")
+    crew_members = relationship("Crew", back_populates="project")
+    todos = relationship("ToDo", back_populates="project")
+    schedule_entries = relationship("ScheduleEntry", back_populates="project")
+    reminders = relationship("Reminder", back_populates="project")
+    scripts = relationship("Script", back_populates="project", order_by="desc(Script.uploaded_at)")
 
 
 class User(Base):
@@ -33,7 +38,9 @@ class Crew(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     role = Column(String)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     tasks = relationship("Task", back_populates="crew")
+    project = relationship("Project", back_populates="crew_members")
 
 
 class Task(Base):
@@ -61,7 +68,7 @@ class Script(Base):
     filename = Column(String)
     filepath = Column(String)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
-    project = relationship("Project")
+    project = relationship("Project", back_populates="scripts")
 
 
 class Scene(Base):
@@ -89,6 +96,7 @@ class ToDo(Base):
     is_post_production = Column(Boolean, default=False)
     status = Column(String, default="pending")
     assigned_crew_id = Column(Integer, ForeignKey("crews.id"), nullable=True)
+    project = relationship("Project", back_populates="todos")
 
 
 class Actor(Base):
@@ -116,6 +124,7 @@ class ScheduleEntry(Base):
     project_id = Column(Integer, ForeignKey("projects.id"))
     task = Column(String)
     dates_json = Column(Text)  # JSON string of dates
+    project = relationship("Project", back_populates="schedule_entries")
 
 
 class Reminder(Base):
@@ -125,3 +134,13 @@ class Reminder(Base):
     remind_date = Column(String)
     message = Column(String)
     sent = Column(Boolean, default=False)
+    project = relationship("Project", back_populates="reminders")
+
+
+class GlobalScript(Base):
+    __tablename__ = "global_scripts"
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String, unique=True)
+    content = Column(Text)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=True)

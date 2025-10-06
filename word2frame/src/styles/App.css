@@ -64,6 +64,8 @@ body {
   display: flex;
   border-radius: 10px 10px 0 0;
   overflow: hidden;
+  transform-origin: top left;
+  animation: clapSwing 2.4s ease-in-out infinite;
 }
 
 .stripe {
@@ -228,3 +230,24 @@ input::placeholder {
 }
 
 /* Ensure default palette defined only once above (:root). Do not redefine --accent below to avoid overriding the original clapboard/golden color. */
+
+@keyframes clapSwing {
+  0% {
+    transform: rotate(-6deg);
+  }
+  20% {
+    transform: rotate(-18deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  55% {
+    transform: rotate(-12deg);
+  }
+  70% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    transform: rotate(-6deg);
+  }
+}
