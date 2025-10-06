@@ -90,4 +90,3 @@ MIT
 
 ---
 
-Would you like me to add a **“Tech Stack + Architecture Diagram”** section (like most hackathon README files include) right after “Brief Description”? It makes your repo look more professional.
