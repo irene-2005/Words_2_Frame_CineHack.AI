@@ -27,12 +27,7 @@ Team: Ann (Frontend), Athira (AI), Irene (Backend).
 Turning words into cinematic frames — powered by intelligence
 ---
 
-### 🌐 **Live Demo**
 
-**URL:** `http://203.0.113.12:3000`
-**API Endpoints:** see `deployment/ENDPOINTS.md`
-
----
 
 ### ⚙️ **Quick Start (Local)**
 
