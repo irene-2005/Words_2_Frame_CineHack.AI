@@ -1,0 +1,9 @@
+{
+  "framework": "create-react-app",
+  "buildCommand": "npm run build",
+  "ignoreCommand": "npm run lint",
+  "outputDirectory": "build",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

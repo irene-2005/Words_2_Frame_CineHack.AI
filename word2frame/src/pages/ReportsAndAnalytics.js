@@ -5,7 +5,7 @@ import { FaChartPie, FaFileAlt, FaMoneyBillWave, FaTasks, FaUsers } from "react-
 import "../styles/other-pages.css";
 
 const ReportsAndAnalytics = () => {
-  const { projectId, authToken } = useContext(ScriptContext);
+  const { projectId, authToken, refreshSnapshot } = useContext(ScriptContext);
   const [reports, setReports] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -31,12 +31,20 @@ const ReportsAndAnalytics = () => {
       setReports(data);
     } catch (fetchError) {
       console.error("Failed to fetch reports:", fetchError);
+      if (fetchError?.status === 404) {
+        try {
+          await refreshSnapshot(undefined, { silent: true });
+        } catch (snapshotError) {
+          console.error("Snapshot refresh failed while recovering reports:", snapshotError);
+        }
+        return;
+      }
       setError("We couldn't load the latest reports. Please try again.");
       setReports(null);
     } finally {
       setLoading(false);
     }
-  }, [projectId, authToken]);
+  }, [projectId, authToken, refreshSnapshot]);
 
   useEffect(() => {
     fetchReports();
