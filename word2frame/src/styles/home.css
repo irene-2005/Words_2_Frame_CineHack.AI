@@ -1,0 +1,85 @@
+.home-container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-title {
+  font-size: 2.5rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.home-subtitle {
+  font-size: 1.1rem;
+  color: #b3b3b3;
+  margin-bottom: 40px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.card {
+  background-color: #1a1a1a;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: left;
+}
+
+.card h3 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  margin-top: 0;
+}
+
+.card p {
+  margin: 0;
+  color: #e0e0e0;
+}
+
+.recent-activity-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-activity-card li {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  color: #e0e0e0;
+}
+
+.recent-activity-card li:last-child {
+  border-bottom: none;
+}
+
+.schedule-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.schedule-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+.schedule-list li:last-child {
+  border-bottom: none;
+}
+
+.empty-state-message {
+  padding: 50px;
+  border: 2px dashed var(--accent);
+  border-radius: 12px;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}

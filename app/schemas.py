@@ -1,6 +1,7 @@
 # app/schemas.py
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel
-from typing import Optional
 
 # Project
 class ProjectCreate(BaseModel):
@@ -15,7 +16,7 @@ class ProjectRead(BaseModel):
     budget: Optional[float] = 0.0
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Crew
 class CrewCreate(BaseModel):
@@ -28,7 +29,7 @@ class CrewRead(BaseModel):
     role: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Task
 class TaskCreate(BaseModel):
@@ -43,7 +44,7 @@ class TaskRead(BaseModel):
     crew_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Finance
 class FinanceCreate(BaseModel):
@@ -58,7 +59,7 @@ class FinanceRead(BaseModel):
     description: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # User
@@ -76,7 +77,7 @@ class UserRead(BaseModel):
     is_admin: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Auth tokens
@@ -99,7 +100,7 @@ class ScriptRead(BaseModel):
     filename: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Scene and Scene analysis
@@ -121,7 +122,7 @@ class SceneRead(BaseModel):
     progress_status: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ToDo
@@ -140,7 +141,7 @@ class ToDoRead(BaseModel):
     status: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Actor / Property
@@ -161,7 +162,7 @@ class ActorRead(BaseModel):
     cost: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PropertyRead(BaseModel):
     id: int
@@ -170,7 +171,7 @@ class PropertyRead(BaseModel):
     cost: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Schedule/Reminder
@@ -181,7 +182,7 @@ class ScheduleEntryRead(BaseModel):
     dates_json: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ReminderCreate(BaseModel):
     project_id: int
@@ -196,5 +197,10 @@ class ReminderRead(BaseModel):
     sent: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class ProjectSnapshot(BaseModel):
+    project: Dict[str, Any]
+    scriptData: Dict[str, Any]
 

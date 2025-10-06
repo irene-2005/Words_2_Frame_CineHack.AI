@@ -1,0 +1,57 @@
+/* Sidebar styles */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(26,26,26,1) 100%);
+  padding: 24px 16px;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.6);
+  z-index: 2000;
+}
+
+.menu-heading {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 8px 0 18px 8px;
+  letter-spacing: 1px;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-links li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ddd;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.nav-links li:hover {
+  background: rgba(255,199,89,0.08);
+  transform: translateX(4px);
+  color: #fff;
+}
+
+.nav-links .icon {
+  color: var(--accent);
+}
+
+/* push main content to the right using a helper class (App places margin-left) */
+.sidebar + .content-spacer {
+  margin-left: 240px;
+}

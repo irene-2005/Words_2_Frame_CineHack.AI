@@ -1,24 +1,43 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-import uvicorn
+from typing import Any
 
-from app.database.database import SessionLocal, engine, Base
-from app.models.models import Project, Crew, Task, Finance
-from app.crud import crud
-from app import schemas
-from app import auth
-from app import auth_supabase
-from fastapi import UploadFile, File, Body
-from pathlib import Path
-from app import ai_integration
+from fastapi import Body, Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import json
-from pathlib import Path as _Path
 import joblib
+from pathlib import Path, Path as _Path
+import uvicorn
+from sqlalchemy import inspect, text
+from sqlalchemy.orm import Session
+
+from app import ai_integration, auth, auth_supabase, schemas
+from app.crud import crud
+from app.database.database import Base, SessionLocal, engine
+from app.services.project_snapshot import build_project_snapshot, build_project_reports
+from app.models.models import Project
 
 # Ensure all tables exist
 Base.metadata.create_all(bind=engine)
 
+
+def _ensure_script_filepath_column() -> None:
+    inspector = inspect(engine)
+    columns = {column["name"] for column in inspector.get_columns("scripts")}
+    if "filepath" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE scripts ADD COLUMN filepath VARCHAR"))
+
+
+_ensure_script_filepath_column()
+
 app = FastAPI(title="CineHack Backend - Irene (backend)")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 from app import worker
 
 
@@ -45,6 +64,24 @@ def get_db():
     finally:
         db.close()
 
+
+def _has_project_access(user: Any, project: Project) -> bool:
+    if getattr(user, "is_admin", False):
+        return True
+    if project.owner_id is None:
+        return True
+    return getattr(user, "id", None) == project.owner_id
+
+
+def ensure_project_edit_access(user: Any, project: Project) -> None:
+    if not _has_project_access(user, project):
+        raise HTTPException(status_code=403, detail="User is not permitted to modify this project")
+
+
+def ensure_project_view_access(user: Any, project: Project) -> None:
+    if not _has_project_access(user, project):
+        raise HTTPException(status_code=403, detail="User is not permitted to view this project")
+
 # ---------- Root endpoint ----------
 @app.get("/", tags=["root"])
 def read_root():
@@ -52,13 +89,29 @@ def read_root():
 
 # ---------- Project endpoints ----------
 @app.post("/projects/", response_model=schemas.ProjectRead)
-def create_project(payload: schemas.ProjectCreate, db: Session = Depends(get_db)):
-    return crud.create_project(db, name=payload.name, description=payload.description, budget=payload.budget)
+def create_project(
+    payload: schemas.ProjectCreate,
+    db: Session = Depends(get_db),
+    user=Depends(auth_supabase.get_current_user_from_supabase),
+):
+    project = crud.create_project(
+        db,
+        name=payload.name,
+        description=payload.description,
+        budget=payload.budget,
+        owner_id=getattr(user, "id", None),
+    )
+    crud.ensure_default_crew(db, project.id)
+    return project
 
 
 # Upload script file (client should save file on server and provide path) -- for hackathon, accept filename and assume file placed in ./uploads
 @app.post("/projects/{project_id}/upload_script", response_model=schemas.ScriptRead)
 async def upload_script(project_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), user = Depends(auth_supabase.get_current_user_from_supabase)):
+    project = crud.get_project_by_id(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail='Project not found')
+    ensure_project_edit_access(user, project)
     uploads = Path.cwd() / 'uploads'
     uploads.mkdir(exist_ok=True)
     # sanitize filename
@@ -68,9 +121,9 @@ async def upload_script(project_id: int, file: UploadFile = File(...), db: Sessi
     with open(filepath, 'wb') as out_f:
         content = await file.read()
         out_f.write(content)
-    # require admin in local mapping
-    if not getattr(user, 'is_admin', False):
-        raise HTTPException(status_code=403, detail='Admin privileges required')
+    # Also save to global scripts
+    content_str = content.decode('utf-8', errors='ignore')
+    crud.create_global_script(db, filename=filename, content=content_str, uploaded_by=getattr(user, "id", None))
     return crud.create_script(db, project_id=project_id, filename=filename, filepath=str(filepath))
 
 
@@ -81,10 +134,19 @@ def analyze_script(project_id: int, filename: str = Body(..., embed=True), db: S
     filepath = uploads / filename
     if not filepath.exists():
         raise HTTPException(status_code=400, detail="Uploaded script file not found on server uploads/ directory")
-    if not getattr(user, 'is_admin', False):
-        raise HTTPException(status_code=403, detail='Admin privileges required')
-    created = ai_integration.analyze_and_create(db, project_id=project_id, script_path=str(filepath))
-    return {"created_scenes": created}
+    project = crud.get_project_by_id(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail='Project not found')
+    ensure_project_edit_access(user, project)
+    try:
+        analysis = ai_integration.analyze_and_create(db, project_id=project_id, script_path=str(filepath))
+    except ai_integration.ScriptExtractionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    snapshot = build_project_snapshot(db, project)
+    response_payload = {**analysis, "snapshot": snapshot}
+    # Maintain backwards compatibility with legacy clients expecting created_scenes key
+    response_payload.setdefault("created_scenes", analysis.get("created_scene_metadata", []))
+    return response_payload
 
 
 # User management
@@ -114,6 +176,31 @@ def login_for_access_token(form_data: dict, db: Session = Depends(get_db)):
 @app.get("/projects/{project_id}/scenes", response_model=list[schemas.SceneRead])
 def get_scenes(project_id: int, db: Session = Depends(get_db)):
     return crud.get_scenes_by_project(db, project_id)
+
+
+@app.get("/projects/{project_id}/snapshot", response_model=schemas.ProjectSnapshot)
+def get_project_snapshot(project_id: int, db: Session = Depends(get_db), user = Depends(auth_supabase.get_current_user_from_supabase)):
+    project = crud.get_project_by_id(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail='Project not found')
+    ensure_project_view_access(user, project)
+    snapshot = build_project_snapshot(db, project)
+    return snapshot
+
+
+@app.get("/projects/{project_id}/reports")
+def get_project_reports(project_id: int, db: Session = Depends(get_db), user = Depends(auth_supabase.get_current_user_from_supabase)):
+    project = crud.get_project_by_id(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail='Project not found')
+    ensure_project_view_access(user, project)
+    return build_project_reports(db, project)
+
+
+@app.get("/projects/default", response_model=schemas.ProjectRead)
+def get_default_project(db: Session = Depends(get_db), user = Depends(auth_supabase.get_current_user_from_supabase)):
+    project = crud.get_or_create_default_project(db, user)
+    return project
 
 
 @app.post("/projects/{project_id}/assign_tasks_ai")
@@ -311,6 +398,38 @@ def create_finance(payload: schemas.FinanceCreate, db: Session = Depends(get_db)
 @app.get("/finances/", response_model=list[schemas.FinanceRead])
 def read_finances(db: Session = Depends(get_db)):
     return crud.get_finances(db)
+
+# ---------- Reports endpoints ----------
+@app.get("/projects/{project_id}/reports")
+def get_project_reports(project_id: int, db: Session = Depends(get_db), user = Depends(auth_supabase.get_current_user_from_supabase)):
+    project = crud.get_project_by_id(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail='Project not found')
+    ensure_project_view_access(user, project)
+    
+    # Aggregate data for reports
+    scenes = crud.get_scenes_by_project(db, project_id)
+    budget = crud.calculate_project_budget(db, project_id)
+    crew = crud.get_crew_by_project(db, project_id)
+    tasks = crud.get_tasks_by_project(db, project_id)
+    finances = crud.get_finances_by_project(db, project_id)
+    
+    total_spent = sum(f.amount_spent for f in finances)
+    remaining_budget = budget - total_spent
+    
+    report = {
+        "project": project.name,
+        "total_scenes": len(scenes),
+        "total_budget": budget,
+        "total_spent": total_spent,
+        "remaining_budget": remaining_budget,
+        "crew_count": len(crew),
+        "tasks_count": len(tasks),
+        "budget_breakdown": crud.get_budget_per_scene(db, project_id),
+        "location_summary": list(crud.summarise_locations(scenes)),
+        "completion_status": crud.get_project_completion_status(db, project_id)
+    }
+    return report
 
 # ---------- Run server ----------
 if __name__ == "__main__":
