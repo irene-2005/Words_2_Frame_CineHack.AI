@@ -114,6 +114,11 @@ def get_crews_by_project(db: Session, project_id: int) -> Iterable[Crew]:
     return db.query(Crew).filter((Crew.project_id == project_id) | (Crew.project_id.is_(None))).all()
 
 
+def get_crew_by_project(db: Session, project_id: int) -> Iterable[Crew]:
+    """Return crew members scoped to a project (excluding global crew)."""
+    return db.query(Crew).filter(Crew.project_id == project_id).order_by(Crew.id.asc()).all()
+
+
 def ensure_default_crew(db: Session, project_id: int) -> Iterable[Crew]:
     existing_roles = {crew.role for crew in get_crews_by_project(db, project_id)}
     created = []
@@ -151,6 +156,15 @@ def create_task(db: Session, title: str, project_id: int, crew_id: int) -> Task:
 
 def get_tasks(db: Session) -> Iterable[Task]:
     return db.query(Task).all()
+
+
+def get_tasks_by_project(db: Session, project_id: int) -> Iterable[Task]:
+    return (
+        db.query(Task)
+        .filter(Task.project_id == project_id)
+        .order_by(Task.id.asc())
+        .all()
+    )
 
 
 def create_finance(db: Session, project_id: int, amount_spent: float, description: str) -> Finance:

@@ -401,35 +401,16 @@ def read_finances(db: Session = Depends(get_db)):
 
 # ---------- Reports endpoints ----------
 @app.get("/projects/{project_id}/reports")
-def get_project_reports(project_id: int, db: Session = Depends(get_db), user = Depends(auth_supabase.get_current_user_from_supabase)):
+def get_project_reports(
+    project_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(auth_supabase.get_current_user_from_supabase),
+):
     project = crud.get_project_by_id(db, project_id)
     if not project:
-        raise HTTPException(status_code=404, detail='Project not found')
+        raise HTTPException(status_code=404, detail="Project not found")
     ensure_project_view_access(user, project)
-    
-    # Aggregate data for reports
-    scenes = crud.get_scenes_by_project(db, project_id)
-    budget = crud.calculate_project_budget(db, project_id)
-    crew = crud.get_crew_by_project(db, project_id)
-    tasks = crud.get_tasks_by_project(db, project_id)
-    finances = crud.get_finances_by_project(db, project_id)
-    
-    total_spent = sum(f.amount_spent for f in finances)
-    remaining_budget = budget - total_spent
-    
-    report = {
-        "project": project.name,
-        "total_scenes": len(scenes),
-        "total_budget": budget,
-        "total_spent": total_spent,
-        "remaining_budget": remaining_budget,
-        "crew_count": len(crew),
-        "tasks_count": len(tasks),
-        "budget_breakdown": crud.get_budget_per_scene(db, project_id),
-        "location_summary": list(crud.summarise_locations(scenes)),
-        "completion_status": crud.get_project_completion_status(db, project_id)
-    }
-    return report
+    return build_project_reports(db, project)
 
 # ---------- Run server ----------
 if __name__ == "__main__":

@@ -280,6 +280,7 @@ def build_project_reports(db: Session, project: Project) -> Dict[str, Any]:
     scenes = list(crud.get_scenes_by_project(db, project.id))
     todos = list(crud.get_todos_by_project(db, project.id))
     crew = list(crud.get_crews_by_project(db, project.id))
+    project_tasks = list(crud.get_tasks_by_project(db, project.id))
     finances = db.query(Finance).filter(Finance.project_id == project.id).all()
 
     total_budget = float(project.budget or 0.0)
@@ -296,13 +297,19 @@ def build_project_reports(db: Session, project: Project) -> Dict[str, Any]:
         (tasks_completed / tasks_total) * 100.0 if tasks_total else 0.0
     )
 
+    budget_breakdown = crud.get_budget_per_scene(db, project.id)
+    location_summary = list(dict.fromkeys(crud.summarise_locations(scenes)))
+
     return {
+        "project": project.name,
         "total_scenes": len(scenes),
         "total_budget": total_budget,
         "total_spent": total_spent,
         "remaining_budget": remaining_budget,
         "crew_count": len(crew),
-        "tasks_count": tasks_total,
+        "tasks_count": len(project_tasks),
+        "budget_breakdown": budget_breakdown,
+        "location_summary": location_summary,
         "completion_status": {
             "tasks_total": tasks_total,
             "tasks_completed": tasks_completed,
